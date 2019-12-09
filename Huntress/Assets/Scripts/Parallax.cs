@@ -5,46 +5,46 @@ using UnityEngine;
 public class Parallax : MonoBehaviour
 {
 
-    public Transform[] backgrounds;
-
-    public float smoothing = 1f;
-
-
-    private float[] parallaxScales;
-    private Transform player;
-    private Vector3 previousPlayerPos;
-
-    void Awake()
-    {
-        player = Camera.main.transform;    
-    }
+    public GameObject cam;
+    public float parallaxEffect;
+    
+    private float lengthX, lengthY, startPosX, startPosY;
 
     // Start is called before the first frame update
     void Start()
     {
-        previousPlayerPos = player.position;
+        startPosX = transform.position.x;
+        startPosY = transform.position.y;
+        lengthX = GetComponent<SpriteRenderer>().bounds.size.x;
+        lengthY = GetComponent<SpriteRenderer>().bounds.size.y;
+    } 
 
-        parallaxScales = new float[backgrounds.Length];
-        for(int i = 0; i < backgrounds.Length; i++)
-        {
-            parallaxScales[i] = backgrounds[i].position.z * -1;
-        }
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        for (int i = 0; i < backgrounds.Length; i++)
+        float tempX = (cam.transform.position.x * (1 - parallaxEffect));
+        float tempY = (cam.transform.position.y * (1 - parallaxEffect));
+
+        float distX = (cam.transform.position.x * parallaxEffect);
+        float distY = (cam.transform.position.y * parallaxEffect);
+
+        transform.position = new Vector3(startPosX + distX, startPosY + distY, transform.position.z);
+
+        if(tempX > startPosX + lengthX)
         {
-            float parallax = previousPlayerPos.x - player.position.x * parallaxScales[i];
-
-            float backgroundTargetPosX = backgrounds[i].position.x + parallax;
-
-            Vector3 backgroundTargetPos = new Vector3(backgroundTargetPosX, backgrounds[i].position.y, backgrounds[i].position.z);
-
-            backgrounds[i].position = Vector3.Lerp(backgrounds[i].position, backgroundTargetPos, smoothing + Time.deltaTime);
+            startPosX += lengthX;
         }
-
-        previousPlayerPos = player.position;
+        else if(tempX < startPosX - lengthX)
+        {
+            startPosX -= lengthX;
+        }
+        else if(tempY > startPosY + lengthY)
+        {
+            startPosY += lengthY;
+        }
+        else if(tempY < startPosY - lengthY)
+        {
+            startPosY -= lengthY;
+        }
     }
+
 }
